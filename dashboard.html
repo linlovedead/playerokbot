@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Дашборд — Playerok Auto-Helper Pro</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #080c10;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px 24px 60px;
+            max-width: 1060px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* ══════════════════ HEADER ══════════════════ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .header-left { display: flex; flex-direction: column; gap: 5px; }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-logo {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: -0.01em;
+        }
+
+        .header-subtitle {
+            font-size: 11px;
+            color: #475569;
+            margin-left: 42px;
+        }
+
+        .header-user {
+            font-size: 11px;
+            color: #64748b;
+            margin-left: 42px;
+            display: none;
+        }
+
+        .header-user .un {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .header-ts {
+            font-size: 10px;
+            color: #334155;
+            margin-left: 42px;
+            margin-top: 1px;
+        }
+
+        /* ══════════════════ TOOLBAR ACTIONS ══════════════════ */
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 13px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 8px;
+            font-size: 11px;
+            transition: all 0.15s;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.09); color: #cbd5e1; }
+
+        .btn-green {
+            background: rgba(34,197,94,0.12);
+            color: #4ade80;
+            border: 1px solid rgba(34,197,94,0.25);
+        }
+        .btn-green:hover { background: rgba(34,197,94,0.2); }
+
+        .btn-blue {
+            background: rgba(56,189,248,0.12);
+            color: #38bdf8;
+            border: 1px solid rgba(56,189,248,0.25);
+        }
+        .btn-blue:hover { background: rgba(56,189,248,0.2); }
+
+        .btn-teal {
+            background: rgba(20,184,166,0.12);
+            color: #2dd4bf;
+            border: 1px solid rgba(20,184,166,0.25);
+        }
+        .btn-teal:hover { background: rgba(20,184,166,0.2); }
+
+        .btn-red {
+            background: rgba(239,68,68,0.1);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+        .btn-red:hover { background: rgba(239,68,68,0.18); }
+
+        .btn-mini {
+            padding: 4px 9px;
+            font-size: 10px;
+            background: rgba(255,255,255,0.06);
+            color: #94a3b8;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.08);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        .btn-mini:hover { background: rgba(255,255,255,0.1); color: #cbd5e1; }
+
+        /* ══════════════════ DIAG PANEL ══════════════════ */
+        #diagPanel {
+            display: none;
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            background: rgba(16,185,129,0.06);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 10px;
+            font-size: 11px;
+            color: #6ee7b7;
+            line-height: 1.7;
+            font-family: Consolas, 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* ══════════════════ CARDS GRID ══════════════════ */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            position: relative;
+            background: #0f1623;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 16px 18px 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            border-radius: 14px 14px 0 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(255,255,255,0.13);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .stat-card:hover::before { opacity: 1; }
+
+        /* Per-card accent colors */
+        .card-completed::before { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+        .card-drafts::before    { background: linear-gradient(90deg, #fb923c, #f59e0b); }
+        .card-published::before { background: linear-gradient(90deg, #4ade80, #34d399); }
+        .stat-card:not([class*="card-"])::before { background: linear-gradient(90deg, #818cf8, #a78bfa); }
+        .card-revenue::before   { background: linear-gradient(90deg, #4ade80, #86efac); }
+        .card-boost::before     { background: linear-gradient(90deg, #fbbf24, #fb923c); }
+        .card-bot::before       { background: linear-gradient(90deg, #c084fc, #a78bfa); }
+
+        /* Open states */
+        .stat-card.open {
+            border-color: rgba(129,140,248,0.4);
+            box-shadow: 0 0 0 1px rgba(129,140,248,0.15), 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .stat-card.open::before { opacity: 1; }
+
+        .stat-card.card-drafts.open   { border-color: rgba(251,146,60,0.4); box-shadow: 0 0 0 1px rgba(251,146,60,0.15), 0 8px 24px rgba(0,0,0,0.4); }
+        .stat-card.card-published.open { border-color: rgba(74,222,128,0.4); box-shadow: 0 0 0 1px rgba(74,222,128,0.15), 0 8px 24px rgba(0,0,0,0.4); }
+        .stat-card.card-revenue.open  { border-color: rgba(74,222,128,0.4); box-shadow: 0 0 0 1px rgba(74,222,128,0.15), 0 8px 24px rgba(0,0,0,0.4); }
+        .stat-card.card-boost.open    { border-color: rgba(251,191,36,0.4); box-shadow: 0 0 0 1px rgba(251,191,36,0.15), 0 8px 24px rgba(0,0,0,0.4); }
+        .stat-card.card-completed.open { border-color: rgba(56,189,248,0.4); box-shadow: 0 0 0 1px rgba(56,189,248,0.15), 0 8px 24px rgba(0,0,0,0.4); }
+        .stat-card.card-bot.open      { border-color: rgba(192,132,252,0.4); box-shadow: 0 0 0 1px rgba(192,132,252,0.15), 0 8px 24px rgba(0,0,0,0.4); }
+
+        /* Card icon */
+        .card-icon {
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: block;
+            line-height: 1;
+        }
+
+        .card-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .card-label .chev {
+            color: #1e293b;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .stat-card.open .card-label .chev { transform: rotate(90deg); color: #818cf8; }
+        .stat-card.card-drafts.open .card-label .chev   { color: #fb923c; }
+        .stat-card.card-published.open .card-label .chev { color: #4ade80; }
+        .stat-card.card-revenue.open .card-label .chev  { color: #4ade80; }
+        .stat-card.card-bot.open .card-label .chev      { color: #c084fc; }
+        .stat-card.card-boost.open .card-label .chev    { color: #fbbf24; }
+        .stat-card.card-completed.open .card-label .chev { color: #38bdf8; }
+
+        .card-value {
+            font-size: 30px;
+            font-weight: 800;
+            color: #f1f5f9;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .card-value.green { color: #4ade80; }
+
+        .card-sub {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .card-sub .hi { color: #38bdf8; font-weight: 600; }
+
+        .card-hint {
+            margin-top: 8px;
+            font-size: 10px;
+            color: #334155;
+            letter-spacing: 0.02em;
+        }
+
+        .card-last {
+            margin-top: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+
+        /* Bot dot */
+        .dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .dot.on  { background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.6); animation: blink 1.5s infinite; }
+        .dot.off { background: #1e293b; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* ══════════════════ DETAIL PANEL ══════════════════ */
+        .detail-wrap {
+            margin-top: 4px;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            background: #0c1420;
+            overflow: hidden;
+            display: none;
+        }
+        .detail-wrap.open { display: block; }
+
+        .detail-head {
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.025);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            letter-spacing: 0.01em;
+        }
+
+        .detail-body {
+            max-height: 520px;
+            overflow-y: auto;
+        }
+
+        .detail-body::-webkit-scrollbar { width: 6px; }
+        .detail-body::-webkit-scrollbar-track { background: transparent; }
+        .detail-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .detail-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+        /* ══════════════════ ROW ITEMS ══════════════════ */
+        .row-item, .row-sale {
+            padding: 13px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 11px;
+            transition: background 0.12s;
+        }
+        .row-item:hover, .row-sale:hover { background: rgba(255,255,255,0.02); }
+        .row-item:last-child, .row-sale:last-child { border-bottom: none; }
+
+        .row-title {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            font-size: 12px;
+        }
+
+        .row-meta  { color: #64748b; font-size: 11px; margin-bottom: 6px; }
+
+        .row-line {
+            color: #64748b;
+            font-size: 11px;
+            margin: 3px 0;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .row-line .k { color: #475569; min-width: 72px; flex-shrink: 0; font-weight: 500; }
+
+        .mono {
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 10px;
+            color: #93c5fd;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 8.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .badge-draft { background: rgba(251,146,60,0.15); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+        .badge-pub   { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+        .badge-sold  { background: rgba(56,189,248,0.12); color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+
+        /* ══════════════════ REVENUE BLOCK ══════════════════ */
+        .rev-block { padding: 16px 18px; font-size: 11px; }
+
+        .rev-section {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #475569;
+            font-weight: 700;
+            margin: 16px 0 8px;
+        }
+        .rev-section:first-child { margin-top: 0; }
+
+        .rev-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        .rev-line:last-child { border-bottom: none; }
+        .rev-line.hi { color: #38bdf8; }
+        .rev-line.total {
+            font-weight: 700;
+            font-size: 14px;
+            color: #4ade80;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            border-bottom: none;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+        .rev-line.neg span:last-child { color: #f87171; }
+        .rev-line.total.neg span:last-child { color: #f87171; }
+
+        .rev-note {
+            margin-top: 14px;
+            padding: 11px 13px;
+            background: rgba(30,41,59,0.5);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            color: #334155;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        /* ══════════════════ MANUAL BOOST / FORMS ══════════════════ */
+        .mb-form {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
+        }
+        .mb-form-title {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .mb-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .mb-row:last-child { margin-bottom: 0; }
+
+        .mb-form input[type="text"],
+        .mb-form input[type="number"] {
+            flex: 1;
+            min-width: 140px;
+            padding: 7px 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 7px;
+            color: #e2e8f0;
+            font-size: 11px;
+            font-family: inherit;
+            transition: border-color 0.15s;
+            outline: none;
+        }
+        .mb-form input[type="text"]:focus,
+        .mb-form input[type="number"]:focus {
+            border-color: rgba(99,102,241,0.5);
+            background: rgba(99,102,241,0.06);
+        }
+        .mb-form input[type="number"] { max-width: 110px; min-width: 80px; flex: 0; }
+        .mb-form input::placeholder { color: #334155; }
+
+        .mb-form .btn-add {
+            padding: 7px 16px;
+            background: rgba(251,191,36,0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.3);
+            border-radius: 7px;
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .mb-form .btn-add:hover { background: rgba(251,191,36,0.25); }
+
+        .mb-list-title {
+            padding: 10px 16px 7px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #475569;
+            font-weight: 700;
+        }
+
+        .mb-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 11px;
+        }
+        .mb-item:last-child { border-bottom: none; }
+        .mb-item:hover { background: rgba(255,255,255,0.02); }
+
+        .mb-item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+        .mb-item-title { font-weight: 600; color: #e2e8f0; font-size: 12px; }
+        .mb-item-rub { color: #fbbf24; font-weight: 700; white-space: nowrap; font-size: 13px; }
+        .mb-item-meta { color: #475569; font-size: 10px; margin-bottom: 6px; }
+        .mb-item-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+        /* Published actions */
+        .pub-actions { margin-top: 9px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+        .pub-actions input[type="number"] {
+            width: 120px;
+            padding: 5px 9px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 11px;
+            font-family: inherit;
+            outline: none;
+        }
+        .pub-form-hint {
+            margin-top: 9px;
+            font-size: 10px;
+            color: #334155;
+            line-height: 1.55;
+        }
+        .pub-form-hint strong { color: #475569; }
+        .pub-form-hint code {
+            font-family: Consolas, monospace;
+            background: rgba(255,255,255,0.05);
+            padding: 1px 4px;
+            border-radius: 3px;
+            color: #64748b;
+        }
+
+        /* ══════════════════ TOP GAMES ══════════════════ */
+        .top-games {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .top-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #475569;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .game-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 7px;
+            font-size: 10px;
+        }
+        .game-row:last-child { margin-bottom: 0; }
+        .game-name { color: #94a3b8; min-width: 130px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .game-track { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+        .game-fill  { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 3px; }
+        .game-cnt { color: #475569; min-width: 26px; text-align: right; font-weight: 600; }
+        .game-sum { color: #4ade80; min-width: 60px; text-align: right; font-weight: 600; }
+
+        /* ══════════════════ BOT BLOCK ══════════════════ */
+        .bot-block { padding: 16px 18px; font-size: 11px; }
+        .bot-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        .bot-row:last-child { border-bottom: none; }
+        .bot-row .k { color: #64748b; font-weight: 500; }
+        .bot-row .v { color: #cbd5e1; font-weight: 600; }
+        .bot-row .v.on  { color: #4ade80; }
+        .bot-row .v.off { color: #f87171; }
+
+        /* ══════════════════ EXPORT BUTTON ══════════════════ */
+        .btn-export {
+            padding: 6px 12px;
+            font-size: 10px;
+            background: rgba(74,222,128,0.12);
+            color: #4ade80;
+            border: 1px solid rgba(74,222,128,0.25);
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.15s;
+            letter-spacing: 0.01em;
+        }
+        .btn-export:hover { background: rgba(74,222,128,0.22); }
+
+        /* btn-grey used by JS dynamically */
+        .btn-grey {
+            background: rgba(255,255,255,0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .btn-grey:hover { background: rgba(255,255,255,0.09); color: #cbd5e1; }
+
+        /* ══════════════════ MULTISELECT ══════════════════ */
+        .bulk-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.025);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .bulk-sel-info {
+            font-size: 11px;
+            color: #38bdf8;
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .btn-sel-all {
+            background: rgba(99,102,241,0.15) !important;
+            color: #a5b4fc !important;
+            border-color: rgba(99,102,241,0.3) !important;
+        }
+        .btn-sel-all:hover {
+            background: rgba(99,102,241,0.25) !important;
+        }
+
+        .btn-bulk-pub {
+            background: rgba(56,189,248,0.15) !important;
+            color: #38bdf8 !important;
+            border-color: rgba(56,189,248,0.3) !important;
+            font-weight: 700 !important;
+        }
+        .btn-bulk-pub:hover {
+            background: rgba(56,189,248,0.25) !important;
+        }
+
+        .btn-bulk-del {
+            background: rgba(239,68,68,0.12) !important;
+            color: #f87171 !important;
+            border-color: rgba(239,68,68,0.25) !important;
+        }
+        .btn-bulk-del:hover {
+            background: rgba(239,68,68,0.22) !important;
+        }
+
+        /* Row checkbox */
+        .row-item {
+            position: relative;
+            cursor: default;
+        }
+
+        .row-item.row-selected {
+            background: rgba(56,189,248,0.06) !important;
+            border-left: 2px solid rgba(56,189,248,0.5);
+            padding-left: 14px;
+        }
+
+        .row-cb-wrap {
+            position: absolute;
+            top: 13px;
+            right: 14px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .row-cb {
+            width: 16px;
+            height: 16px;
+            accent-color: #38bdf8;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* Action button variants used by JS */
+        .btn-mini-del-site {
+            color: #f87171 !important;
+            font-weight: 700 !important;
+            border-color: rgba(239,68,68,0.4) !important;
+        }
+        .btn-mini-from-list {
+            color: #fca5a5 !important;
+        }
+        .btn-mini-publish {
+            background: rgba(30,136,229,0.15) !important;
+            color: #60a5fa !important;
+            font-weight: 700 !important;
+            border-color: rgba(30,136,229,0.35) !important;
+        }
+
+        /* ══════════════════ MISC ══════════════════ */
+        .empty {
+            padding: 28px;
+            text-align: center;
+            color: #334155;
+            font-size: 11px;
+        }
+
+        a { color: #38bdf8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        hr.sep { border: none; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        /* Pagination */
+        .pg-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+            padding: 0 16px 14px;
+        }
+        .pg-info { color: #475569; font-size: 11px; flex: 1; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="header-brand">
+            <div class="header-logo">🎮</div>
+            <div class="header-title">Playerok Auto-Helper Pro</div>
+        </div>
+        <div class="header-subtitle">Локальная сводка · данные сохраняются между обновлениями расширения</div>
+        <div class="header-user" id="userLine">Аккаунт: <span class="un" id="userName"></span></div>
+        <div class="header-ts" id="tsLabel">—</div>
+    </div>
+    <div class="toolbar-actions">
+        <button class="btn btn-ghost"  id="btnRefresh">↺ Обновить</button>
+        <button class="btn btn-green"  id="btnDiag">⚙ Диагностика</button>
+        <button class="btn btn-blue"   id="btnExportAll">⬇ Экспорт БД</button>
+        <button class="btn btn-teal"   id="btnImportAll">⬆ Импорт БД</button>
+        <button class="btn btn-red"    id="btnClear">✕ Очистить сводку</button>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none">
+</div>
+
+<div id="diagPanel"></div>
+
+<div class="cards" id="cardsGrid">
+
+    <button class="stat-card card-completed" id="cCompleted">
+        <span class="card-icon">📦</span>
+        <div class="card-label">Завершённые <span class="chev">▸</span></div>
+        <div class="card-value" id="vCompleted">0</div>
+        <div class="card-sub" id="sCompletedSub">Сумма цен: <strong style="color:#94a3b8">0</strong> ₽</div>
+        <div class="card-last" id="sCompletedLast"></div>
+        <div class="card-hint">Снимок с Playerok · <span id="sCompletedRefreshBtn" title="Обновить данные о товарах" style="cursor:pointer;text-decoration:underline dotted;color:#94a3b8">🔄 обновить</span></div>
+    </button>
+
+    <button class="stat-card card-drafts" id="cDrafts">
+        <span class="card-icon">📝</span>
+        <div class="card-label">Черновики <span class="chev">▸</span></div>
+        <div class="card-value" id="vDrafts">0</div>
+        <div class="card-sub">Сумма: <strong id="sDraftsSum" style="color:#94a3b8">0</strong> ₽</div>
+        <div class="card-last" id="sDraftsLast"></div>
+        <div class="card-hint">Нажмите для просмотра списка</div>
+    </button>
+
+    <button class="stat-card card-published" id="cPublished">
+        <span class="card-icon">🟢</span>
+        <div class="card-label">Опубликованные <span class="chev">▸</span></div>
+        <div class="card-value" id="vPublished">0</div>
+        <div class="card-sub">Сумма: <strong id="sPublishedSum" style="color:#94a3b8">0</strong> ₽</div>
+        <div class="card-last" id="sPublishedLast"></div>
+        <div class="card-hint">Лоты в продаже · нажмите для списка</div>
+    </button>
+
+    <button class="stat-card" id="cSales">
+        <span class="card-icon">💸</span>
+        <div class="card-label">Автопродажи <span class="chev">▸</span></div>
+        <div class="card-value" id="vSales">0</div>
+        <div class="card-sub" id="sSalesSub">Выручка: <strong style="color:#94a3b8">0</strong> ₽</div>
+        <div class="card-last" id="sSalesLast"></div>
+        <div class="card-hint">Игра, покупатель, данные аккаунта</div>
+    </button>
+
+    <button class="stat-card card-revenue" id="cRevenue">
+        <span class="card-icon">💰</span>
+        <div class="card-label">Выручка <span class="chev">▸</span></div>
+        <div class="card-value green" id="vRevenue">—</div>
+        <div class="card-sub">Сегодня: <span class="hi" id="sRevenueToday">—</span> ₽ · всего <span id="sRevenueCnt">0</span> продаж</div>
+        <div class="card-last" id="sRevenueNet" style="display:none;color:#fbbf24"></div>
+        <div class="card-last" id="sRevenueComm" style="display:none;color:#4ade80"></div>
+        <div class="card-hint">Нажмите — разбивка по периодам</div>
+    </button>
+
+    <button class="stat-card card-boost" id="cManualBoost">
+        <span class="card-icon">🚀</span>
+        <div class="card-label">Ручной буст <span class="chev">▸</span></div>
+        <div class="card-value" id="vManualBoost" style="font-size:22px">—</div>
+        <div class="card-sub">Записей: <strong id="vManualBoostCnt" style="color:#94a3b8">0</strong> · потрачено на буст</div>
+        <div class="card-hint">Ссылка + сумма для учёта прибыли</div>
+    </button>
+
+    <button class="stat-card card-bot" id="cBot">
+        <span class="card-icon">🤖</span>
+        <div class="card-label">Бот <span class="chev">▸</span></div>
+        <div class="card-value" id="vBot">
+            <span class="dot off" id="botDot"></span><span id="botTxt" style="font-size:16px;font-weight:700">—</span>
+        </div>
+        <div class="card-sub" id="sBotSub">Поднято: <strong id="sBotProc" style="color:#94a3b8">0</strong></div>
+        <div class="card-last" id="sBotLast"></div>
+        <div class="card-hint">Нажмите — подробнее о сессии</div>
+    </button>
+
+</div>
+
+<div class="detail-wrap" id="detailPanel">
+    <div class="detail-head">
+        <span id="detailTitle">Детали</span>
+        <button class="btn-export" id="btnExport" style="display:none">⬇ Экспорт CSV</button>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

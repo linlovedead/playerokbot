@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Автопубликация — Playerok Elite Bot</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      width: 520px;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 14px 14px 20px;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ff00;
+      margin: 0 0 12px;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sub {
+      text-align: center;
+      font-size: 11px;
+      color: #888;
+      margin: -6px 0 12px;
+    }
+
+    .progress-container { margin-bottom: 10px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: #aaa; }
+    .progress-track { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #00ff00; width: 0%; transition: width 0.3s ease; }
+
+    .status-box {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .status-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .status-row:last-child { margin-bottom: 0; }
+    .status-value { color: #fff; font-weight: bold; }
+
+    .settings-group {
+      background: #1e1e1e;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      border: 1px solid #333;
+    }
+
+    .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .input-row:last-child { margin-bottom: 0; }
+    label { font-size: 11px; color: #aaa; }
+
+    .toggle-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+      padding: 8px;
+      background: #252525;
+      border-radius: 6px;
+      border: 1px solid #333;
+    }
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      margin-left: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: #00ff00;
+    }
+    .toggle-label { flex: 1; }
+    .toggle-label strong { display: block; font-size: 12px; color: #e0e0e0; margin-bottom: 4px; }
+    .toggle-label span { font-size: 10px; color: #888; line-height: 1.35; }
+
+    input[type="number"] {
+      width: 55px;
+      padding: 3px;
+      background: #2d2d2d;
+      border: 1px solid #444;
+      color: #00ff00;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+      text-transform: uppercase;
+      font-size: 11px;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn.primary { background: #00ff00; color: #000; }
+    .btn.secondary { background: #cf6679; color: #000; }
+
+    #applyBtn {
+      width: 100%;
+      padding: 5px;
+      background: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 4px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .btn-text {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 10px;
+      text-decoration: underline;
+    }
+
+    .btn-text:hover { color: #fff; }
+
+    .actions { display: flex; gap: 8px; margin-bottom: 8px; }
+
+    .console-body {
+      padding: 8px 10px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      height: 380px;
+      overflow-y: scroll;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #111;
+      color: #0f0;
+    }
+
+    .console { background: #000; border: 1px solid #333; border-radius: 5px; overflow: hidden; }
+
+    .console-header {
+      background: #1e1e1e;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #555;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #1e1e1e; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+  </style>
+</head>
+
+<body>
+  <h1>Автопубликация</h1>
+  <p class="sub">Панель настроек в этой вкладке. Скан товаров идёт в отдельном окне браузера — в основном окне можно открывать любые страницы Playerok.</p>
+
+  <div id="boostProgress" class="progress-container">
+    <div class="progress-label">
+      <span>Прогресс цикла</span>
+      <span id="progressText">0/15</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressBar"></div>
+    </div>
+  </div>
+
+  <div class="status-box">
+    <div class="status-row">
+      <span>Статус:</span>
+      <span class="status-value" id="statusText">Ожидание...</span>
+    </div>
+    <div class="status-row">
+      <span>Сегодня:</span>
+      <span class="status-value" id="dailyStatsCounter" style="color: #00ff00;">выложено 0 · поднято 0</span>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="input-row">
+      <label>Задержка (сек):</label>
+      <div style="display: flex; gap: 5px;">
+        <input type="number" id="minDelay" value="7">
+        <input type="number" id="maxDelay" value="12">
+      </div>
+    </div>
+    <div class="input-row">
+      <label>Сон (мин):</label>
+      <input type="number" id="sleepTime" value="3">
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="boostIncludeDrafts" />
+      <label class="toggle-label" for="boostIncludeDrafts">
+        <strong>Черновики в фильтре</strong>
+        <span>Если включено, в очередь попадают и карточки «Черновик», не только «Истёк срок». Удобно после массового создания черновиков в «Создание товаров» — автопубликация поднимет их бесплатно.</span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="boostFocusPlayerokTab" />
+      <label class="toggle-label" for="boostFocusPlayerokTab">
+        <strong>Фокус на вкладку товаров перед сканом</strong>
+        <span>Chrome замедляет скрипты во вкладке, пока она в фоне (когда активна эта панель). Включи — перед каждым сканом фокус перейдёт на страницу товаров; скан будет идти в полном темпе, но окно панели может уходить на задний план.</span>
+      </label>
+    </div>
+    <button id="applyBtn">Применить настройки</button>
+  </div>
+
+  <div class="actions">
+    <button id="startBtn" class="btn primary">START</button>
+    <button id="stopBtn" class="btn secondary">STOP</button>
+  </div>
+  <div class="actions">
+    <button id="deleteCompletedBtn" class="btn secondary" style="flex:1;background:#b71c1c;color:#fff;border:1px solid #ff5252;">🗑 Удалить «Завершённые»</button>
+  </div>
+  <p class="sub" style="margin:-4px 0 10px;font-size:10px;color:#888;">Тот же список, что и автопубликация. Сначала STOP. Идёт removeItem по UUID из страницы; цикл повторяется после обновления.</p>
+
+  <div class="console">
+    <div class="console-header">
+      <span>LOGS</span>
+      <div style="display:flex;gap:8px;">
+        <button id="exportLogsBtn" class="btn-text" style="margin:0;padding:2px 6px;">💾 Экспорт</button>
+        <button id="clearLogsBtn" class="btn-text" style="margin:0;padding:2px 6px;">Очистить</button>
+      </div>
+    </div>
+    <div id="logs" class="console-body logs-container"></div>
+  </div>
+  <script src="auto_boost.js"></script>
+</body>
+
+</html>

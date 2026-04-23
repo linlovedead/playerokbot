@@ -1,0 +1,9 @@
+.claude/
+.cursor/
+_metadata/
+dist/
+*.zip
+*.sqlite
+node_modules/
+.DS_Store
+Thumbs.db

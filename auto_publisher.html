@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Создание товаров (Playerok)</title>
+    <style>
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #aaa;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        label {
+            font-size: 13px;
+            color: #aaa;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            box-sizing: border-box;
+            background: #2d2d2d;
+            color: #00ff00;
+            border: 1px solid #444;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .delay-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .delay-group>div {
+            flex: 1;
+        }
+
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background: #2d2d2d;
+            color: #00ff00;
+            border: 1px solid #444;
+            padding: 8px;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: 'Consolas', monospace;
+            min-height: 150px;
+        }
+
+        .btn {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 14px;
+            transition: opacity 0.2s;
+            text-align: center;
+        }
+
+        .btn.stop {
+            background: #cf6679;
+        }
+
+        .btn.pause {
+            background: #e6a817;
+            color: #000;
+        }
+
+        .btn.resume {
+            background: #2979ff;
+            color: #fff;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .logs {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            color: #0f0;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .output-box {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            color: #bb86fc;
+        }
+
+        .output-item {
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .output-item a {
+            color: #bb86fc;
+            text-decoration: underline;
+        }
+
+        .steam-country-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-width: 560px;
+        }
+
+        .steam-country-chips label {
+            display: inline-block;
+            margin: 0;
+            padding: 6px 12px;
+            border-radius: 18px;
+            cursor: pointer;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #ccc;
+            font-size: 12px;
+            user-select: none;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        .steam-country-chips label.steam-country-chip-on {
+            background: #1a3d1a;
+            border-color: #4caf50;
+            color: #a5d6a7;
+        }
+
+        .steam-country-chips input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* PROGRESS BAR */
+        .progress-container {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #00ff00;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📝 Создание товаров</h1>
+
+    <div class="container">
+        <!-- Левая панель: настройки -->
+        <div class="panel" style="flex: 1.2;">
+            <div class="panel-title">Настройки публикации</div>
+
+            <div id="genModeBadge"
+                style="font-size:12px; color:#2196F3; padding: 6px 8px; background:#111; border-radius:6px; border:1px solid #333;">
+                📝 Режим: Список (изображения из Steam)
+            </div>
+
+            <!-- Источник фото для обложки товара (независимо от генератора карточек) -->
+            <div style="background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <label style="margin: 0; font-size: 14px; color: #ccc; font-weight: bold;">&#128444;&#65039;
+                        Источник фото обложки</label>
+                    <div style="display:flex; gap:6px;">
+                        <button id="imgModeAutoBtn" style="padding:5px 12px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:bold;
+                            background:#00ff00; color:#000; border:1px solid #00cc00; transition:all 0.2s;">
+                            &#127760; Авто
+                        </button>
+                        <button id="imgModeLocalBtn" style="padding:5px 12px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:bold;
+                            background:#333; color:#888; border:1px solid #555; transition:all 0.2s;">
+                            &#128193; Папка
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Режим Авто: выбираешь источник -->
+                <div id="imgAutoBlock">
+                    <select id="publisherImageSource"
+                        style="width:100%; box-sizing:border-box; background:#2d2d2d; color:#00ff00; border:1px solid #444; padding:8px; border-radius:4px;">
+                        <option value="steam">Steam Store</option>
+                        <option value="steampass">SteamPass.gg</option>
+                        <option value="agru">AG.ru</option>
+                        <option value="steamgriddb">SteamGridDB</option>
+                    </select>
+                    <div id="publisherSgdbRow" style="display:none; margin-top:8px;">
+                        <label style="font-size:11px; color:#888;">SteamGridDB API Key</label>
+                        <input type="text" id="publisherSteamGridDbKey"
+                            placeholder="Тот же ключ, что в редакторе шаблонов"
+                            style="width:100%; box-sizing:border-box; background:#1e1e1e; color:#4dd0e1; border:1px solid #555; padding:6px; border-radius:4px; font-size:12px; margin-top:3px;">
+                    </div>
+                </div>
+
+                <!-- Режим Папка: готовые PNG/JPG/WebP -->
+                <div id="imgLocalBlock" style="display:none;">
+                    <label style="font-size:12px; color:#aaa;">Папка с PNG/JPG: <code
+                            style="color:#888;">Battle.png</code> как в списке игр (без лишних символов)</label>
+                    <input type="file" id="publisherLocalCardsFolder" webkitdirectory multiple
+                        accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp"
+                        style="margin-top:6px; width:100%; font-size:11px; color:#ccc;">
+                    <p style="margin:8px 0 0; font-size:10px; color:#666; line-height:1.35;">Локальную карточку можно
+                        сделать в «Редакторе шаблонов», сохранить как <strong>Название игры.png</strong> и выбрать папку
+                        здесь.</p>
+                </div>
+            </div>
+
+            <!-- Режим публикации: сразу / черновик -->
+            <div style="background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label style="margin: 0; font-size: 14px; color: #ccc; font-weight: bold;">Режим публикации</label>
+                    <div style="display: flex; gap: 6px;">
+                        <button id="modePublishBtn" style="
+                            padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;
+                            background: #00ff00; color: #000; border: 1px solid #00cc00; transition: all 0.2s;">
+                            🚀 Опубликовать
+                        </button>
+                        <button id="modeDraftBtn" style="
+                            padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;
+                            background: #333; color: #888; border: 1px solid #555; transition: all 0.2s;">
+                            📝 Черновик
+                        </button>
+                    </div>
+                </div>
+                <div id="publishModeHint" style="margin-top: 5px; font-size: 11px; color: #666;">
+                    Товар будет опубликован сразу после создания.
+                </div>
+            </div>
+
+            <!-- Строгий поиск игр (только режим «По игре») -->
+            <div id="strictSearchBlock" style="background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <label style="margin: 0; font-size: 14px; color: #ccc; font-weight: bold;">Строгий поиск
+                            игры</label>
+                        <div id="strictSearchHint" style="margin-top: 4px; font-size: 11px; color: #666;">Если название
+                            не найдено точно — лот уйдёт в «Другие игры», название товара не перезапишется.</div>
+                    </div>
+                    <button id="strictSearchBtn"
+                        style="
+                        background: #333; color: #888; border: 1px solid #555;
+                        padding: 6px 14px; border-radius: 20px; cursor: pointer;
+                        font-size: 12px; font-weight: bold; transition: all 0.2s; white-space: nowrap; margin-left: 10px;">
+                        ⬜ ВЫКЛ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Категория лота: По игре / Steam / Другие игры (взаимоисключающие) -->
+            <div id="publisherCategoryBlock" style="background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;">
+                <label style="margin: 0 0 8px 0; font-size: 14px; color: #ccc; font-weight: bold; display: block;">
+                    Категория лота (Playerok)
+                </label>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                    <button type="button" id="publisherCatAutoBtn" style="
+                        padding: 6px 14px; border-radius: 20px; cursor: pointer;
+                        font-size: 12px; font-weight: bold; transition: all 0.2s;
+                        background: #1a3d1a; color: #4caf50; border: 1px solid #4caf50;">
+                        По игре: ✅
+                    </button>
+                    <button type="button" id="publisherCatSteamBtn" style="
+                        padding: 6px 14px; border-radius: 20px; cursor: pointer;
+                        font-size: 12px; font-weight: bold; transition: all 0.2s;
+                        background: #333; color: #888; border: 1px solid #555;">
+                        Steam: ⬜
+                    </button>
+                    <button type="button" id="publisherCatOtherGamesBtn" style="
+                        padding: 6px 14px; border-radius: 20px; cursor: pointer;
+                        font-size: 12px; font-weight: bold; transition: all 0.2s;
+                        background: #333; color: #888; border: 1px solid #555;">
+                        Другие игры: ⬜
+                    </button>
+                </div>
+                <div id="publisherGamePageLotRow" style="display: block; margin-top: 10px;">
+                    <label for="publisherGamePageLotCategory" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Подкатегория (по игре)
+                    </label>
+                    <select id="publisherGamePageLotCategory" style="
+                        width: 100%; max-width: 420px; padding: 8px 10px; border-radius: 6px;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    </select>
+                </div>
+                <div id="publisherGamePageObtainingRow" style="display: none; margin-top: 12px;">
+                    <label for="publisherGamePageObtainingType" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Способ передачи
+                    </label>
+                    <select id="publisherGamePageObtainingType" style="
+                        width: 100%; max-width: 520px; padding: 8px 10px; border-radius: 6px;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    </select>
+                </div>
+                <div id="publisherGamePageAccountAttrsRow" style="display: none; margin-top: 14px;">
+                    <div style="font-size: 12px; color: #aaa; margin-bottom: 6px;">Тип аккаунта</div>
+                    <div id="publisherGpAccountTypeChips" class="steam-country-chips" aria-label="Тип аккаунта (по игре)"></div>
+                    <label for="publisherGamePageLevel" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; margin-top: 12px;">
+                        Уровень Steam
+                    </label>
+                    <input type="text" id="publisherGamePageLevel" placeholder="например 20 или 20-30" style="
+                        width: 100%; max-width: 420px; padding: 8px 10px; border-radius: 6px; box-sizing: border-box;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    <div style="margin-top: 10px; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Страна аккаунта
+                    </div>
+                    <div id="publisherGpCountryChips" class="steam-country-chips" aria-label="Страна (по игре)"></div>
+                </div>
+                <div id="publisherOtherGamesRow" style="display: none; margin-top: 10px;">
+                    <label for="publisherOtherGamesLotCategory" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Подкатегория (другие игры)
+                    </label>
+                    <select id="publisherOtherGamesLotCategory" style="
+                        width: 100%; max-width: 420px; padding: 8px 10px; border-radius: 6px;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    </select>
+                </div>
+                <div id="publisherOtherGamesObtainingRow" style="display: none; margin-top: 12px;">
+                    <label for="publisherOtherGamesObtainingType" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Способ передачи
+                    </label>
+                    <select id="publisherOtherGamesObtainingType" style="
+                        width: 100%; max-width: 520px; padding: 8px 10px; border-radius: 6px;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    </select>
+                </div>
+                <div id="publisherOtherGamesAccountAttrsRow" style="display: none; margin-top: 14px;">
+                    <div style="font-size: 12px; color: #aaa; margin-bottom: 6px;">Тип аккаунта</div>
+                    <div id="publisherOgAccountTypeChips" class="steam-country-chips" aria-label="Тип аккаунта (другие игры)"></div>
+                    <label for="publisherOtherGamesLevel" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; margin-top: 12px;">
+                        Уровень Steam
+                    </label>
+                    <input type="text" id="publisherOtherGamesLevel" placeholder="например 20 или 20-30" style="
+                        width: 100%; max-width: 420px; padding: 8px 10px; border-radius: 6px; box-sizing: border-box;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    <div style="margin-top: 10px; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Страна аккаунта
+                    </div>
+                    <div id="publisherOgCountryChips" class="steam-country-chips" aria-label="Страна (другие игры)"></div>
+                </div>
+                <div id="publisherSteamLotRow" style="display: none; margin-top: 10px;">
+                    <label for="publisherSteamLotCategory" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Подкатегория (Steam)
+                    </label>
+                    <select id="publisherSteamLotCategory" style="
+                        width: 100%; max-width: 420px; padding: 8px 10px; border-radius: 6px;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    </select>
+                </div>
+                <div id="publisherSteamObtainingRow" style="display: none; margin-top: 12px;">
+                    <label for="publisherSteamObtainingType" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Способ передачи
+                    </label>
+                    <select id="publisherSteamObtainingType" style="
+                        width: 100%; max-width: 520px; padding: 8px 10px; border-radius: 6px;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    </select>
+                </div>
+                <div id="publisherSteamAccountAttrsRow" style="display: none; margin-top: 14px;">
+                    <div style="font-size: 12px; color: #aaa; margin-bottom: 6px;">Тип аккаунта</div>
+                    <div id="publisherSteamAccountTypeChips" class="steam-country-chips" aria-label="Тип аккаунта"></div>
+                    <label for="publisherSteamLevel" style="display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; margin-top: 12px;">
+                        Уровень Steam
+                    </label>
+                    <input type="text" id="publisherSteamLevel" placeholder="например 20 или 20-30" style="
+                        width: 100%; max-width: 420px; padding: 8px 10px; border-radius: 6px; box-sizing: border-box;
+                        background: #1a1a1a; color: #e0e0e0; border: 1px solid #444; font-size: 13px;">
+                    <div style="margin-top: 10px; font-size: 12px; color: #aaa; margin-bottom: 6px;">
+                        Страна аккаунта
+                    </div>
+                    <div id="publisherSteamCountryChips" class="steam-country-chips" aria-label="Страна аккаунта"></div>
+                </div>
+            </div>
+
+            <!-- Цена и дублирование -->
+            <div
+                style="background: #111; border: 1px solid #333; border-radius: 6px; padding: 12px; margin-bottom: 5px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <label style="margin: 0; font-size: 14px; color: #ccc; font-weight: bold;">Режим
+                        дублирования</label>
+                    <button id="duplicateModeBtn" style="
+                        background: #333; color: #888; border: 1px solid #555;
+                        padding: 6px 14px; border-radius: 20px; cursor: pointer;
+                        font-size: 12px; font-weight: bold; transition: all 0.2s;">
+                        ⬜ ВЫКЛ
+                    </button>
+                </div>
+
+                <!-- Одна цена (когда дублирование выкл) -->
+                <div id="singlePriceBlock">
+                    <label>Цена (руб.):</label>
+                    <input type="number" id="priceInput" value="90" min="1" max="99999" style="width: 100px;">
+                </div>
+
+                <!-- Индивидуальные цены (когда дублирование вкл) -->
+                <div id="rangePriceBlock" style="display: none;">
+                    <div style="margin-bottom: 8px;">
+                        <label>Количество копий каждой игры:</label>
+                        <input type="number" id="duplicateCount" value="3" min="1" max="20" style="width: 80px;">
+                    </div>
+                    <div>
+                        <label>Цена каждой копии (руб.):</label>
+                        <div id="copyPricesList"
+                            style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
+                            <!-- JS генерирует поля -->
+                        </div>
+                    </div>
+                    <div id="smartDupRow" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #333;">
+                        <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px; color: #ccc;">
+                            <input type="checkbox" id="smartDuplicateCheckbox" style="margin-top: 2px;">
+                            <span>Умное дублирование: 3+3+3 — «По игре», Steam, «Другие игры». Фаза «По игре» только если в каталоге есть карточка с тем же названием, что строка в списке (иначе первые 3 копии пропуск, далее 3 Steam + 3 другие — без «левых» лотов). Название в лоте как в списке. Способ передачи — офлайн.</span>
+                        </label>
+                        <div style="font-size: 11px; color: #666; margin-top: 6px; margin-left: 22px;">
+                            Блок выбора категории скрывается. Тип / уровень / страна берутся из текущих полей Steam (откройте режим Steam и заполните до включения галочки — или останутся значения по умолчанию).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Скидка: после создания карточки, до публикации / в черновике с нужными ценами -->
+            <div
+                style="background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px; margin-bottom: 5px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label style="margin: 0; font-size: 14px; color: #ccc; font-weight: bold;">Скидка на лоте</label>
+                    <button id="discountModeBtn" type="button" style="
+                        background: #333; color: #888; border: 1px solid #555;
+                        padding: 6px 14px; border-radius: 20px; cursor: pointer;
+                        font-size: 12px; font-weight: bold; transition: all 0.2s;">
+                        ⬜ ВЫКЛ
+                    </button>
+                </div>
+                <div id="discountHint" style="margin-top: 5px; font-size: 11px; color: #666;">
+                    Сначала лот создаётся с базовой ценой, затем — updateItem с новой ценой. При дублировании — своя
+                    пара цен на каждую копию.
+                </div>
+                <div id="discountFields" style="display: none; margin-top: 10px;">
+                    <div id="discountSingleRow" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 120px;">
+                            <label>Базовая цена (₽)</label>
+                            <input type="number" id="discountBasePrice" value="100" min="1" max="999999"
+                                style="width:100%; box-sizing:border-box;">
+                        </div>
+                        <div style="flex: 1; min-width: 100px;">
+                            <label>Новая цена (₽)</label>
+                            <input type="number" id="discountSalePrice" value="90" min="1" max="999999"
+                                style="width:100%; box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div id="discountCopyList"
+                        style="display: none; flex-direction: column; gap: 8px; margin-top: 4px;">
+                        <!-- JS: пары база/новая по числу копий -->
+                    </div>
+                    <div id="discountPreview" style="margin-top: 8px; font-size: 12px; color: #4caf50;"></div>
+                </div>
+            </div>
+
+            <div class="delay-group">
+                <div>
+                    <label>Задержка между кликами (сек):</label>
+                    <input type="number" id="actionDelay" value="2" min="1" max="10">
+                </div>
+                <div>
+                    <label>Задержка между товарами (сек):</label>
+                    <input type="number" id="publishDelay" value="10" min="5" max="120">
+                </div>
+            </div>
+
+            <!-- Games source block — toggles based on generator mode -->
+            <div id="gamesSourceBlock"
+                style="background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <label style="margin: 0; font-size: 14px; color: #ccc; font-weight: bold;">Список игр</label>
+                    <div style="display: flex; gap: 6px;">
+                        <button id="gamesSourceListBtn" style="
+                            padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;
+                            background: #00ff00; color: #000; border: 1px solid #00cc00; transition: all 0.2s;">
+                            📝 Свой список
+                        </button>
+                        <button id="gamesSourceCatalogBtn" style="
+                            padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;
+                            background: #333; color: #888; border: 1px solid #555; transition: all 0.2s;">
+                            🌐 Каталог SP
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Manual list -->
+                <div id="gamesListBlock">
+                    <textarea id="gamesList"
+                        placeholder="Titanfall 2&#10;Или с данными: Игра - login: user pass: secret&#10;Или: Название[Tab]логин[Tab]пароль"
+                        style="min-height: 100px;"></textarea>
+                    <p style="margin:4px 0 0;font-size:11px;color:#888;line-height:1.35;">Форматы в одном списке: только
+                        название; <code style="color:#aaa;">Название - login: … pass: …</code> (или логин/пароль); три
+                        колонки через Tab или <code style="color:#aaa;">;</code> из Excel.</p>
+                </div>
+
+                <!-- Catalog mode info -->
+                <div id="gamesCatalogBlock" style="display:none;">
+                    <div id="catalogFetchStatus" style="font-size: 12px; color: #888; padding: 6px 0;">
+                        ⏳ Каталог не загружен. Нажмите «Загрузить» перед запуском.
+                    </div>
+                    <button id="publisherFetchCatalogBtn" style="
+                        background: #2196F3; color: #fff; border: none; padding: 7px 14px;
+                        border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; width: 100%;">
+                        📥 Загрузить каталог SteamPass
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label>Шаблон названия товара ("НАЗВАНИЕ ИГРЫ" = автозамена):</label>
+                <input type="text" id="nameTemplate" value="НАЗВАНИЕ ИГРЫ | Оффлайн Steam | Аккаунт"
+                    style="width: 100%; box-sizing: border-box; font-size: 12px; padding: 5px;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label>Шаблон комментария продавца (виден только вам; «НАЗВАНИЕ ИГРЫ» = автозамена):</label>
+                <textarea id="commentTemplate"
+                    style="width: 100%; box-sizing: border-box; min-height: 120px; font-size: 11px; padding: 5px;">Аккаунт с игрой НАЗВАНИЕ ИГРЫ. Оффлайн доступ.</textarea>
+            </div>
+
+            <div>
+                <label>Шаблон описания (используйте "НАЗВАНИЕ ИГРЫ" для автозамены):</label>
+                <textarea id="descTemplate" style="min-height: 200px; font-size: 11px;">🌟"НАЗВАНИЕ ИГРЫ" — Оффлайн активация, мгновенный доступ
+
+Описание
+
+👑 Товар:  аккаунт с игрой "НАЗВАНИЕ ИГРЫ" ВСЕ DLC включены
+🔓 Тип доступа: Навсегда в ОФФЛАЙН-режиме
+💻 Платформа: Steam
+🌐 Регион: Global — работает в любой стране
+📥 Доставка: Мгновенно после оплаты (логин + пароль)
+✨ Что входит в комплект
+• Готовый аккаунт с уже установленной игрой
+• Полная возможность играть вечно без интернета
+• Никаких региональных ограничений
+📜 Инструкция по запуску (всего 3 минуты)
+
+1. Скачайте и установите официальный клиент Steam
+2. Войдите в аккаунт с полученными данными
+3. Найдите "НАЗВАНИЕ ИГРЫ" в библиотеке и скачайте (если нужно)
+4. Переключитесь в автономный режим (Steam → Перейти в автономный режим)
+5. Запустите игру!
+
+🚫 СТРОГО ЗАПРЕЩЕНО
+• Играть в онлайн-режиме
+• Менять пароль, почту, привязывать телефон или любые данные
+• Аккаунт общий (shared), но в оффлайн всё работает без помех
+
+⚔️ Важное предупреждение
+На большинстве аккаунтов активирован Steam Guard.
+При ошибке Denuvo возврат средств не возможен.
+Если эти условия вам не подходят — пожалуйста, не оформляйте заказ.</textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="startBtn" class="btn" style="flex: 1; min-width: 130px;">🚀 Начать создание</button>
+                <button id="pauseBtn" class="btn pause" style="flex: 1; min-width: 130px;" disabled>⏸️ Пауза</button>
+                <button id="stopBtn" class="btn stop" style="flex: 1; min-width: 130px;" disabled>⏹️ Остановить</button>
+            </div>
+            <div id="pauseStatus"
+                style="display:none; font-size:12px; color:#e6a817; padding:6px 8px; background:#1a1500; border:1px solid #4d3800; border-radius:6px; margin-top:4px;">
+            </div>
+
+            <div id="publishProgress" class="progress-container">
+                <div class="progress-label">
+                    <span>Прогресс</span>
+                    <span id="progressText">0 / 0</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая панель: логи и результаты -->
+        <div class="panel" style="flex: 1;">
+            <div class="panel-title">Логи выполнения</div>
+            <div id="logs" class="logs">Ожидание запуска...</div>
+
+            <div class="panel-title" style="margin-top: 20px;">Успешно выложенные лоты</div>
+            <div id="outputContainer" class="output-box">
+                <!-- Ссылки/названия лотов будут здесь -->
+            </div>
+        </div>
+    </div>
+
+    <script src="auto_publisher.js"></script>
+</body>
+
+</html>

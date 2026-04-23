@@ -1,0 +1,91 @@
+{
+  "manifest_version": 3,
+  "name": "Playerok Auto-Helper Pro",
+  "version": "2.2",
+  "description": "Автовыдача и автоподнятие Playerok + SteamPass (State Machine Edition)",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "windows",
+    "scripting",
+    "sidePanel",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "notifications",
+    "cookies",
+    "downloads"
+  ],
+  "host_permissions": [
+    "*://*.playerok.com/*",
+    "*://*.steampass.gg/*",
+    "*://store.steampowered.com/*",
+    "*://*.steamstatic.com/*",
+    "*://*.akamaihd.net/*",
+    "*://*.ag.ru/*",
+    "*://cdn.ag.ru/*",
+    "*://*.steamgriddb.com/*"
+  ],
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "action": {
+    "default_title": "Открыть панель управления"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://playerok.com/*",
+        "*://*.playerok.com/*"
+      ],
+      "js": [
+        "content_bridge_main.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://playerok.com/*",
+        "*://*.playerok.com/*"
+      ],
+      "js": [
+        "content_bridge.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://playerok.com/*",
+        "*://*.playerok.com/*"
+      ],
+      "js": [
+        "content.js",
+        "content_greeting.js",
+        "content_playerok.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://*.steampass.gg/*"
+      ],
+      "js": [
+        "content_steampass.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "speed_boost",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
+}

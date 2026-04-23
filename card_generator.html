@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Редактор шаблонов (Playerok)</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0 0 14px;
+            font-size: 17px;
+        }
+
+        .container {
+            display: flex;
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #aaa;
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        label {
+            font-size: 12px;
+            color: #888;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        input[type="file"], select {
+            width: 100%;
+            background: #2d2d2d;
+            color: #00ff00;
+            border: 1px solid #444;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        select option { background: #2d2d2d; }
+
+        textarea {
+            width: 100%;
+            background: #2d2d2d;
+            color: #00ff00;
+            border: 1px solid #444;
+            padding: 7px;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            min-height: 110px;
+        }
+
+        .btn {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 9px 12px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+            transition: opacity 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover { opacity: 0.88; }
+        .btn:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+        .btn-row { display: flex; gap: 8px; }
+        .btn-row .btn { width: auto; flex: 1; }
+
+        .btn-stop { background: #cf6679; color: #fff; display: none; }
+        .btn-blue { background: #2196F3; color: #fff; }
+        .btn-gray { background: #333; color: #ccc; }
+
+        .logs-wrap { position: relative; }
+
+        .logs {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 8px 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 11px;
+            color: #0f0;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .btn-export-logs {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #333;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            padding: 3px 7px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
+        .btn-export-logs:hover { background: #444; color: #fff; }
+
+        .preview-box {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 5px;
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        canvas { max-width: 100%; height: auto; display: block; }
+
+        /* CATALOG */
+        .catalog-status {
+            font-size: 12px;
+            color: #888;
+            min-height: 18px;
+        }
+
+        /* EDITOR MODAL */
+        .editor-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #121212;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-toolbar {
+            background: #1a1a1a;
+            border-bottom: 2px solid #333;
+            padding: 7px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .editor-toolbar-sep {
+            width: 1px;
+            height: 20px;
+            background: #444;
+            margin: 0 4px;
+            flex-shrink: 0;
+        }
+
+        .editor-canvas-wrapper {
+            flex: 1;
+            overflow: auto;
+            background: #000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            cursor: default;
+        }
+
+        .editor-canvas-wrapper canvas { max-width: none; }
+
+        .btn-toolbar {
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #2d2d2d;
+            color: #ccc;
+            border: 1px solid #444;
+            cursor: pointer;
+            border-radius: 4px;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .btn-toolbar:hover { background: #3d3d3d; color: #fff; }
+        .btn-toolbar:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-toolbar.active {
+            background: #00ff00;
+            color: #000;
+            border-color: #00cc00;
+        }
+
+        .btn-toolbar.danger {
+            background: #3d1a1a;
+            color: #cf6679;
+            border-color: #cf6679;
+        }
+
+        .btn-toolbar.danger:hover { background: #cf6679; color: #fff; }
+
+        /* Zones panel */
+        .zones-panel {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 4px 8px;
+        }
+
+        .zones-panel span { font-size: 11px; color: #888; }
+
+        .zone-count-btn {
+            width: 22px; height: 22px;
+            background: #333;
+            color: #ccc;
+            border: 1px solid #555;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .zone-count-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .zone-count-val {
+            min-width: 18px;
+            text-align: center;
+            font-weight: bold;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        /* Draw buttons container */
+        #drawBtnsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+
+        /* Help overlay */
+        .help-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .help-content {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 22px 26px;
+            max-width: 520px;
+            color: #ccc;
+        }
+
+        .help-content h3 { color: #00ff00; margin: 0 0 14px; font-size: 14px; text-transform: uppercase; }
+        .help-content ul { padding-left: 18px; margin: 0; }
+        .help-content li { margin-bottom: 10px; font-size: 13px; line-height: 1.5; }
+        .help-content b { color: #fff; }
+        .help-content kbd {
+            background: #333; border: 1px solid #555; border-radius: 3px;
+            padding: 1px 5px; font-size: 11px; color: #ddd;
+        }
+        .help-content .help-footer { text-align: right; margin-top: 16px; }
+
+        .hidden { display: none !important; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1e1e1e; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+    </style>
+</head>
+
+<body>
+    <h1>🖼️ Редактор шаблонов</h1>
+
+    <div class="container">
+        <!-- LEFT PANEL -->
+        <div class="panel" style="flex: 1.2;">
+            <div class="panel-title">Настройки</div>
+
+            <div>
+                <label>Шаблон (PNG/JPG):</label>
+                <input type="file" id="templateInput" accept="image/png,image/jpeg">
+            </div>
+
+            <div>
+                <label>Режим генерации:</label>
+                <select id="genModeSelect">
+                    <option value="list">📝 По списку (вручную)</option>
+                    <option value="steampass_catalog">🌐 Каталог SteamPass</option>
+                </select>
+            </div>
+
+            <div id="imageSourceRow">
+                <label>Источник картинок:</label>
+                <select id="imageSourceSelect">
+                    <option value="steam" selected>Steam Store (стабильно, рекомендуется)</option>
+                    <option value="steampass">SteamPass.gg (с фолбэком на Steam)</option>
+                    <option value="agru">AG.ru (старые/редкие игры)</option>
+                    <option value="steamgriddb">SteamGridDB (арты высокого качества)</option>
+                </select>
+            </div>
+
+            <!-- SteamGridDB API key field -->
+            <div id="steamgriddbKeyRow" style="display:none; margin-top:6px;">
+                <label style="font-size:12px; color:#aaa;">
+                    🔑 SteamGridDB API Key
+                    <a href="https://www.steamgriddb.com/profile/preferences/api" target="_blank"
+                       style="color:#4dd0e1; font-size:11px; margin-left:6px;">получить ключ →</a>
+                </label>
+                <input type="text" id="steamgriddbApiKey" placeholder="Вставьте API-ключ сюда..."
+                    style="width:100%; box-sizing:border-box; background:#1e1e1e; color:#4dd0e1;
+                           border:1px solid #4dd0e1; border-radius:4px; padding:6px 8px; font-size:12px; margin-top:3px;">
+            </div>
+
+            <!-- Mode: by list -->
+            <div id="gamesListBlock">
+                <label>Список игр (каждая с новой строки):</label>
+                <textarea id="gamesList" placeholder="Titanfall 2&#10;Dying Light&#10;Rust&#10;&#10;Если игра не находится — укажи AppID Steam:&#10;Battlefield 2 [1238810]&#10;Half-Life [70]"></textarea>
+            </div>
+
+            <!-- Mode: SteamPass catalog -->
+            <div id="catalogBlock" style="display:none;">
+                <button id="fetchCatalogBtn" class="btn btn-blue">📥 Загрузить каталог SteamPass</button>
+                <div id="catalogStatus" class="catalog-status">Нажмите кнопку для загрузки списка игр.</div>
+            </div>
+
+            <div class="btn-row">
+                <button id="generateBtn" class="btn">🚀 Генерировать</button>
+                <button id="stopGenBtn" class="btn btn-stop">⏹ Стоп</button>
+            </div>
+
+            <div class="panel-title">Редактор координат</div>
+            <div style="font-size: 11px; color: #666; margin-top: -5px;">
+                Открой редактор для точной настройки рамок баннера и скриншотов.
+            </div>
+            <button id="btnOpenEditor" class="btn btn-blue">✏️ Открыть редактор рамок</button>
+
+            <div class="panel-title">Логи</div>
+            <div class="logs-wrap">
+                <div id="logs" class="logs">Жду шаблона и списка игр...</div>
+                <button id="exportLogsBtn" class="btn-export-logs" title="Скачать логи">💾 Скачать</button>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="panel" style="flex: 1;">
+            <div class="panel-title">Предпросмотр</div>
+            <div class="preview-box">
+                <canvas id="previewCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN EDITOR MODAL -->
+    <div id="editorModal" class="editor-modal hidden">
+        <div class="editor-toolbar">
+            <!-- Back -->
+            <button id="btnCloseEditor" class="btn-toolbar" style="background:#444;color:#ccc;">🔙 Назад</button>
+
+            <div class="editor-toolbar-sep"></div>
+
+            <!-- Zones manager -->
+            <div class="zones-panel">
+                <span>Баннер:</span>
+                <button id="btnToggleBanner" class="btn-toolbar" style="padding:3px 8px;">✅ Баннер</button>
+                <div class="editor-toolbar-sep" style="margin:0 2px;"></div>
+                <span>Скриншоты:</span>
+                <button id="btnRemoveSS" class="zone-count-btn">−</button>
+                <span id="ssCountDisplay" class="zone-count-val">3</span>
+                <button id="btnAddSS" class="zone-count-btn">+</button>
+                <span style="color:#555;font-size:10px;">макс 8</span>
+            </div>
+
+            <div class="editor-toolbar-sep"></div>
+
+            <!-- Dynamic draw mode buttons -->
+            <div id="drawBtnsContainer"></div>
+
+            <!-- Help -->
+            <button id="btnHelp" class="btn-toolbar"
+                style="background:#2196F3;color:#fff;border-radius:50%;width:26px;height:26px;padding:0;font-size:14px;flex-shrink:0;">?</button>
+
+            <!-- Reset -->
+            <button id="btnResetCoords" class="btn-toolbar danger" style="margin-left:auto;">🗑️ Сброс</button>
+        </div>
+
+        <div class="editor-canvas-wrapper" id="editorCanvasWrapper">
+            <canvas id="editorCanvas"></canvas>
+        </div>
+
+        <!-- Help overlay -->
+        <div id="helpModal" class="help-overlay hidden">
+            <div class="help-content">
+                <h3>❔ Редактор рамок — справка</h3>
+                <ul>
+                    <li><b>Рисование новой рамки:</b> Активируй нужную кнопку (например «✏️ Баннер»), затем зажми
+                        <kbd>ЛКМ</kbd> и потяни. Рамка сохранится при отпускании.</li>
+                    <li><b>Изменение размера:</b> Наведи мышь на <b>край или угол</b> рамки — курсор изменится на
+                        стрелку-ресайз. Зажми <kbd>ЛКМ</kbd> и потяни.</li>
+                    <li><b>Перемещение:</b> Наведи на <b>центр</b> рамки (курсор <kbd>move</kbd>), зажми и потяни.</li>
+                    <li><b>Умный клик (клонирование размера):</b> Пока активна кнопка выбора, <b>кликни</b> (не тяни) —
+                        создастся рамка того же размера, что и последняя.</li>
+                    <li><b>Удаление рамки:</b> <kbd>ПКМ</kbd> по рамке → подтверди. Или наведи мышь и нажми
+                        <kbd>Delete</kbd>.</li>
+                    <li><b>Зоны (Баннер / Скриншоты):</b> Кнопка «✅ Баннер» включает/выключает зону баннера. Кнопки
+                        <kbd>−</kbd> / <kbd>+</kbd> добавляют или убирают слоты скриншотов (0–8).</li>
+                </ul>
+                <div class="help-footer">
+                    <button id="btnCloseHelp" class="btn" style="width:auto;padding:6px 16px;font-size:12px;">Понятно</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="card_generator.js"></script>
+</body>
+
+</html>

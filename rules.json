@@ -1,0 +1,48 @@
+[
+    {
+        "id": 1,
+        "priority": 1,
+        "action": {
+            "type": "block"
+        },
+        "condition": {
+            "urlFilter": "||playerok.com/uploads/",
+            "resourceTypes": [
+                "image"
+            ]
+        }
+    },
+    {
+        "id": 2,
+        "priority": 100,
+        "action": {
+            "type": "block"
+        },
+        "condition": {
+            "urlFilter": "||fullstory.com",
+            "resourceTypes": ["script", "xmlhttprequest", "ping", "websocket"]
+        }
+    },
+    {
+        "id": 3,
+        "priority": 100,
+        "action": {
+            "type": "block"
+        },
+        "condition": {
+            "urlFilter": "||edge.fullstory.com",
+            "resourceTypes": ["script", "xmlhttprequest", "ping", "websocket"]
+        }
+    },
+    {
+        "id": 4,
+        "priority": 100,
+        "action": {
+            "type": "block"
+        },
+        "condition": {
+            "urlFilter": "||rs.fullstory.com",
+            "resourceTypes": ["script", "xmlhttprequest", "ping", "websocket"]
+        }
+    }
+]

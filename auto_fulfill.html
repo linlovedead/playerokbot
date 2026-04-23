@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Автовыдача — Playerok Elite Bot</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 12px 16px 20px;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+    }
+
+    /* ── Шапка ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 10px;
+    }
+    .page-header h1 {
+      color: #00ff00;
+      margin: 0;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #modeBadge {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #modeBadge.badge-classic {
+      background: #1a2a1a;
+      color: #66bb6a;
+      border: 1px solid #2a4a2a;
+    }
+    #modeBadge.badge-ai {
+      background: #0d1f0d;
+      color: #00ff00;
+      border: 1px solid #00aa00;
+    }
+    #licBadge {
+      font-size: 10px;
+      color: #555;
+      cursor: pointer;
+    }
+    #licBadge:hover { color: #888; }
+
+    /* ── Двухколоночный layout ── */
+    .layout {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    /* ── Левая колонка: монитор ── */
+    .col-monitor {
+      flex: 0 0 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ── Правая колонка: контролы ── */
+    .col-controls {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    /* ── Общие блоки ── */
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 7px;
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+    .card-title {
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title span { color: #555; font-weight: normal; text-transform: none; letter-spacing: 0; font-size: 9px; }
+
+    /* ── Статус ── */
+    .status-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; }
+    .status-row:last-child { margin-bottom: 0; }
+    .status-value { color: #fff; font-weight: bold; }
+
+    /* ── Переключатель режима ── */
+    .mode-toggle {
+      display: flex;
+      background: #0d0d0d;
+      border: 1px solid #222;
+      border-radius: 6px;
+      padding: 3px;
+      gap: 3px;
+      margin-bottom: 8px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: #555;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .mode-btn:hover:not(.active) { color: #888; background: #181818; }
+    .mode-btn.active.btn-classic { background: #1a2a1a; color: #66bb6a; }
+    .mode-btn.active.btn-ai { background: #0d1f0d; color: #00ff00; box-shadow: 0 0 8px rgba(0,255,0,0.08); }
+    .mode-desc {
+      font-size: 10px;
+      color: #555;
+      line-height: 1.5;
+      padding: 6px 8px;
+      background: #0d0d0d;
+      border-radius: 4px;
+    }
+
+    /* ── AI статус бейдж ── */
+    .ai-badge {
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: normal;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .ai-badge.active { background: #0d2a0d; color: #00ff00; border: 1px solid #006600; }
+    .ai-badge.warning { background: #2a1800; color: #ffb74d; border: 1px solid #885500; }
+    .ai-badge.off { background: #1a1a1a; color: #555; border: 1px solid #2a2a2a; }
+
+    /* ── Монитор: список чатов ── */
+    .monitor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .monitor-title {
+      font-size: 11px;
+      font-weight: bold;
+      color: #ccc;
+    }
+    .monitor-count {
+      font-size: 10px;
+      background: #2a2a2a;
+      color: #aaa;
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    .monitor-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .chat-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .chat-card {
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      transition: border-color 0.15s;
+    }
+    .chat-card:hover { border-color: #3a3a3a; }
+    .chat-avatar {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #2d3a2d;
+      color: #00cc44;
+      font-size: 14px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+    }
+    .chat-avatar.unknown { background: #2a2a2a; color: #555; font-size: 12px; }
+    .chat-avatar.manual { background: #1a2a3a; color: #00bcd4; font-size: 10px; font-weight: bold; }
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-name {
+      font-size: 11px;
+      font-weight: bold;
+      color: #e0e0e0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-game {
+      font-size: 9px;
+      color: #888;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-meta {
+      font-size: 9px;
+      color: #555;
+      margin-top: 2px;
+      font-family: 'Consolas', monospace;
+    }
+    .chat-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+    .btn-chat-open {
+      padding: 3px 9px;
+      font-size: 9px;
+      border: 1px solid #3a5a3a;
+      border-radius: 4px;
+      background: transparent;
+      color: #66bb6a;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .btn-chat-open:hover { background: #1e3a1e; border-color: #66bb6a; }
+    .btn-chat-del {
+      padding: 3px 9px;
+      font-size: 9px;
+      border: none;
+      border-radius: 4px;
+      background: #3a1a1e;
+      color: #ef9a9a;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-chat-del:hover { background: #5c2b35; }
+
+    .chat-empty {
+      text-align: center;
+      padding: 24px 0;
+      color: #444;
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    /* ── Ручное добавление ── */
+    .add-form { display: flex; flex-direction: column; gap: 5px; }
+    .add-form label { font-size: 10px; color: #777; }
+    .add-input {
+      width: 100%;
+      padding: 5px 8px;
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 11px;
+      font-family: 'Consolas', monospace;
+      outline: none;
+    }
+    .add-input:focus { border-color: #00bcd4; }
+    .add-row { display: flex; gap: 6px; }
+    .btn-add {
+      flex-shrink: 0;
+      padding: 5px 14px;
+      background: #006270;
+      color: #80deea;
+      border: none;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .btn-add:hover { background: #00838f; }
+    .btn-add:disabled { opacity: 0.4; cursor: not-allowed; }
+    #manualAddStatus { font-size: 10px; min-height: 13px; }
+    #manualAddStatus.ok { color: #66bb6a; }
+    #manualAddStatus.err { color: #ef9a9a; }
+    #manualAddStatus.pending { color: #ffb74d; }
+
+    /* ── Контролы ── */
+    .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 11px; }
+    .input-row:last-child { margin-bottom: 0; }
+    label { font-size: 11px; color: #aaa; }
+
+    input[type="number"] {
+      width: 55px; padding: 3px; background: #1e1e1e; border: 1px solid #333;
+      color: #00ff00; border-radius: 4px; text-align: center; font-weight: bold; font-size: 12px;
+    }
+    input[type="text"].settings-text {
+      width: 140px; padding: 3px 5px; background: #1e1e1e; border: 1px solid #333;
+      color: #00ff00; border-radius: 4px; font-size: 11px;
+    }
+
+    /* ── AI поля ── */
+    .ai-field-label {
+      font-size: 10px;
+      color: #777;
+      margin-bottom: 3px;
+    }
+    .ai-field {
+      width: 100%;
+      padding: 6px 8px;
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #00ff00;
+      font-size: 11px;
+      font-family: 'Consolas', monospace;
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .ai-field:focus { border-color: #00aa00; }
+    /* select отдельно — без monospace, иначе Chrome рендерит как listbox */
+    select.ai-select {
+      width: 100%;
+      padding: 5px 8px;
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #00ff00;
+      font-size: 11px;
+      outline: none;
+      margin-bottom: 8px;
+      cursor: pointer;
+      appearance: auto;
+    }
+    select.ai-select:focus { border-color: #00aa00; }
+    .ai-field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    .ai-field-row:last-of-type { margin-bottom: 0; }
+    .ai-info {
+      font-size: 9px;
+      color: #444;
+      margin-top: 6px;
+      line-height: 1.5;
+      padding: 6px 8px;
+      background: #0d0d0d;
+      border-radius: 4px;
+    }
+
+    .actions { display: flex; gap: 8px; }
+    .btn {
+      flex: 1; padding: 10px; border: none; cursor: pointer; font-weight: bold;
+      border-radius: 5px; text-transform: uppercase; font-size: 11px;
+      transition: opacity 0.2s; min-width: 0;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn.primary { background: #00ff00; color: #000; }
+    .btn.secondary { background: #cf6679; color: #000; }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .btn-text {
+      background: none; border: none; color: #666; cursor: pointer;
+      font-size: 10px; text-decoration: underline; padding: 0;
+    }
+    .btn-text:hover { color: #aaa; }
+    .btn-apply {
+      width: 100%; padding: 5px; background: #2a2a2a; color: #aaa;
+      border: 1px solid #333; cursor: pointer; border-radius: 4px; font-size: 11px;
+      margin-top: 4px;
+    }
+    .btn-apply:hover { background: #333; color: #fff; }
+
+    .utils-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-start;
+    }
+
+    /* ── Консоль ── */
+    .console { background: #000; border: 1px solid #222; border-radius: 6px; overflow: hidden; }
+    .console-header {
+      background: #1a1a1a; padding: 4px 10px; font-size: 10px; font-weight: bold;
+      color: #444; border-bottom: 1px solid #222; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .console-body {
+      padding: 8px 10px; font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 11px; line-height: 1.4; height: 260px; overflow-y: scroll;
+      white-space: pre-wrap; word-break: break-word; background: #0a0a0a; color: #0f0;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+  </style>
+</head>
+
+<body>
+
+  <div id="mainContent">
+
+    <div class="page-header">
+      <h1>Автовыдача</h1>
+    </div>
+
+    <div class="layout">
+
+      <!-- ══ Левая колонка: монитор ══ -->
+      <div class="col-monitor">
+
+        <div class="card">
+          <div class="monitor-header">
+            <div class="monitor-title">Мониторинг 2FA</div>
+            <div class="monitor-actions">
+              <span id="monitorCount" class="monitor-count">0 чатов</span>
+              <button type="button" id="refreshMonitorBtn" class="btn-text">обновить</button>
+              <button type="button" id="resetBtn" class="btn-text" style="color:#8b3a3a;">сбросить</button>
+            </div>
+          </div>
+
+          <ul id="monitoredList" class="chat-list"></ul>
+        </div>
+
+        <!-- Добавить вручную -->
+        <div class="card">
+          <div class="card-title">Добавить клиента вручную</div>
+          <div class="add-form">
+            <label>URL чата или chatId</label>
+            <div class="add-row">
+              <input type="text" id="manualChatInput" class="add-input" placeholder="playerok.com/chat/… или ID" autocomplete="off" spellcheck="false">
+              <button type="button" id="manualAddBtn" class="btn-add">Добавить</button>
+            </div>
+            <label>UUID SteamPass <span style="color:#555">(только для переопределения — иначе найдём автоматически)</span></label>
+            <input type="text" id="manualUuidInput" class="add-input" placeholder="Оставьте пустым — UUID найдём сами" autocomplete="off" spellcheck="false">
+            <div id="manualAddStatus"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══ Правая колонка: контролы ══ -->
+      <div class="col-controls">
+
+        <!-- Статус + счётчики -->
+        <div class="card">
+          <div class="card-title">Статус</div>
+          <div class="status-row">
+            <span>Режим:</span>
+            <span class="status-value" id="statusText">Ожидание...</span>
+          </div>
+          <div class="status-row">
+            <span>Приветствий отправлено:</span>
+            <span class="status-value" id="greetingCount">0</span>
+          </div>
+          <div class="status-row">
+            <span>Пользователей в БД:</span>
+            <span class="status-value" id="dbUserCount">0</span>
+          </div>
+        </div>
+
+        <!-- Настройки -->
+        <div id="classicSettingsCard" class="card">
+          <div class="card-title">Настройки</div>
+          <div class="input-row">
+            <label>Ник Playerok:</label>
+            <input type="text" id="usernameInput" class="settings-text" placeholder="ваш ник">
+          </div>
+          <div class="input-row">
+            <label>Пауза между циклами (сек):</label>
+            <div style="display:flex;gap:5px;">
+              <input type="number" id="minDelay" value="7">
+              <input type="number" id="maxDelay" value="12">
+            </div>
+          </div>
+          <div class="input-row" title="Сколько выдач вы уже сделали сегодня вручную — прибавляется к счётчику бота для лимита SteamPass (24)">
+            <label>К плану сегодня (+вручную):</label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number" id="fulfillManualOffset" value="0" min="0" max="24" style="width:56px;color:#ffcc00;">
+              <span style="font-size:10px;color:#555;">из 24</span>
+            </div>
+          </div>
+          <button id="applyBtn" class="btn-apply">Применить настройки</button>
+        </div>
+
+        <!-- Старт / Стоп -->
+        <div class="card">
+          <div class="actions">
+            <button id="startBtn" class="btn primary">▶ START</button>
+            <button id="stopBtn" class="btn secondary">■ STOP</button>
+          </div>
+        </div>
+
+        <!-- Утилиты -->
+        <div class="card">
+          <div class="card-title">Утилиты</div>
+          <div class="utils-row">
+            <button id="resetGreetingStatsBtn" class="btn-text">Обнулить счётчики приветствий / БД</button>
+            <button id="resetFulfillProcessedBtn" class="btn-text" style="color:#ffb74d;">Сбросить обработанные заказы</button>
+            <button id="resetBoostHistoryBtn" class="btn-text">Сбросить историю автоподнятия лотов</button>
+          </div>
+        </div>
+
+        <!-- Консоль -->
+        <div class="console">
+          <div class="console-header">
+            <span>LOGS</span>
+            <div style="display:flex;gap:8px;">
+              <button id="exportLogsBtn" class="btn-text" style="margin:0;padding:2px 6px;">💾 Экспорт</button>
+              <button id="clearLogsBtn" class="btn-text" style="margin:0;padding:2px 6px;">Очистить</button>
+            </div>
+          </div>
+          <div id="logs" class="console-body"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="auto_fulfill.js"></script>
+</body>
+
+</html>
