@@ -2478,7 +2478,11 @@ async function closeHiddenSteamPassWindow() {
 
 // Configure Side Panel
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+    try {
+        chrome.sidePanel?.setPanelBehavior?.({ openPanelOnActionClick: true });
+    } catch (e) {
+        console.warn('[sidePanel] API недоступен в этом браузере:', e?.message);
+    }
     // loadProcessedUrls вызывается в bg_boost.js (где функция определена)
 });
 // Load saved username and userId so all modes work without re-logging in
