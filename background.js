@@ -1,3 +1,12 @@
+/*
+ * Playerok Auto-Helper
+ * Copyright (c) 2026 linlovedead (@dehughuglight, leeds.eha@gmail.com)
+ *
+ * Dual-licensed under AGPL-3.0 (open source) or a commercial license.
+ * For commercial use, contact: Telegram @dehughuglight / leeds.eha@gmail.com
+ * Full terms: see LICENSE file.
+ */
+
 // webRequest spy removed — caused all SteamPass requests to be intercepted/slowed
 
 // ==========================================

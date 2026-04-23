@@ -1,0 +1,63 @@
+Copyright (c) 2026 linlovedead (@dehughuglight)
+
+This project is dual-licensed:
+
+================================================================================
+  1. OPEN SOURCE LICENSE — GNU Affero General Public License v3.0 (AGPL-3.0)
+================================================================================
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/agpl-3.0.html>.
+
+Key obligations under AGPL-3.0:
+  - You MUST disclose the source code of any modified version.
+  - If you operate a modified version on a network service that interacts
+    with users, you MUST make the complete source code of your version
+    publicly available to those users.
+  - Derivative works MUST be licensed under AGPL-3.0.
+  - Credit to the original author MUST be preserved.
+
+================================================================================
+  2. COMMERCIAL LICENSE
+================================================================================
+
+If you wish to use this software in a way that is NOT compatible with the
+AGPL-3.0 (for example: integration into closed-source commercial products,
+SaaS platforms without opening your source code, proprietary forks, resale),
+you must obtain a separate commercial license from the author.
+
+For commercial licensing inquiries, partnerships, or any questions, contact:
+
+  Telegram: @dehughuglight
+  Email:    leeds.eha@gmail.com
+
+================================================================================
+  3. ATTRIBUTION REQUIREMENT
+================================================================================
+
+Regardless of which license option you choose, you must:
+  - Preserve this copyright notice in all copies and substantial portions
+    of the software.
+  - Provide clear attribution to the original author in any derivative work.
+  - Not misrepresent the origin of this software.
+
+================================================================================
+  DISCLAIMER
+================================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE
+USE OF THIS SOFTWARE, INCLUDING ACCOUNT BANS, POLICY VIOLATIONS, OR FINANCIAL
+LOSSES ON THIRD-PARTY PLATFORMS (Playerok, SteamPass, Steam, etc.).
